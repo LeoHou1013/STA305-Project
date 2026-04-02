@@ -1,0 +1,499 @@
+---
+title: 'STA305H5S: Project'
+author: "Bruce Liu, Chunxu Hou, jinke lyu, Yiran Zhai"
+date: "Winter 2026"
+output:
+  pdf_document:
+    number_sections: true
+    latex_engine: xelatex
+  html_document:
+    df_print: paged
+  word_document: default
+spacing: double
+header-includes:
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- "\\fancyhead[L]{STA305H5-Experimental Design}"
+- \fancyfoot[CO,CE]{}
+- \fancyfoot[LE,RO]{\thepage}
+- \usepackage{setspace}\doublespacing
+---
+
+
+```{=tex}
+\newpage 
+\tableofcontents 
+\newpage
+```
+
+```{r setup, include=FALSE}
+library(scidesignR)
+data(fertdat)
+
+model <- lm(fert ~ trt, data = fertdat)
+res <- residuals(model)
+```
+
+# Part 1 
+This study investigates whether two different fertilizers lead to different levels of wheat yield. Understanding such differences is important in agricultural practice, as selecting a more effective fertilizer can improve productivity and resource efficiency.
+The objective is to determine whether any observed difference in average yield between Fertilizer A and Fertilizer B is due to a real treatment effect or simply random variation. This will be assessed using statistical methods, including exploratory analysis and hypothesis testing.
+
+## Research Question
+Determine whether there is a statistically significant difference in mean wheat yield between Fertilizer A and Fertilizer B.
+
+## Experimental Units
+The experimental units are individual plots (or plants), each receiving one type of fertilizer treatment. These units are assumed to be independent.
+
+## Response Variable
+The response variable is wheat yield, measured for each experimental unit. This variable reflects the effectiveness of the fertilizer treatment.
+
+## Treatment Factor
+The treatment factor is fertilizer type, with two levels: Fertilizer A and Fertilizer B. The goal is to compare these two treatments to assess their impact on wheat yield.
+
+## Exploratory Data Analysis
+The sample mean wheat yield for Fertilizer A is 22.18, while for Fertilizer B is 20.48, suggesting a slightly higher average yield under Fertilizer A. However, summary statistics alone do not indicate whether this difference is meaningful.
+The boxplot below compares the distributions of wheat yield for the two fertilizer groups. It shows that both groups have similar medians and comparable variability, with no clear separation between them.
+
+```{r, echo=FALSE, out.width="60%", fig.align="center"}
+boxplot(fert ~ trt, data = fertdat,
+        xlab = "Fertilizer Type",
+        ylab = "Wheat Yield",
+        main = "Comparison of Wheat Yield by Fertilizer Type")
+```
+
+## Assumption Checks
+To validate the use of a two-sample t-test, we examine the assumptions of normality and equal variance.
+The normality assumption is assessed using a Q-Q plot of the residuals and the Shapiro–Wilk test. The plot shows points approximately along the reference line, and the test yields a p-value of 0.8418, indicating no evidence against normality.
+
+```{r, echo=FALSE, out.width="60%", fig.align="center"}
+qqnorm(res)
+qqline(res)
+```{r, echo=FALSE, fig.cap="Normal Q-Q plot of residuals"}
+```
+The constant variance assumption is assessed using a residuals versus fitted values plot. The residuals appear randomly scattered around zero with no clear pattern, suggesting that the variance is approximately constant.
+
+```{r, echo=FALSE, out.width="60%", fig.align="center"}
+plot(fitted(model), res,
+     xlab = "Fitted Values",
+     ylab = "Residuals",
+     main = "Residuals vs Fitted Plot")
+abline(h = 0, col = "red")
+```{r, echo=FALSE, fig.cap="Residuals vs fitted values"}
+```
+In addition, an F-test for equality of variances gives a p-value of 0.217, which supports the assumption that the two groups have equal variances.
+
+
+## Hypothesis Test
+To formally assess whether the two fertilizers lead to different average wheat yields, a two-sample t-test is conducted.
+Let $\mu_A$ and $\mu_B$ denote the mean wheat yield under Fertilizer A and Fertilizer B, respectively. The hypotheses are:
+Null hypothesis: $\mu_A$ = $\mu_B$  
+Alternative hypothesis: $\mu_A$ $\neq$ $\mu_B$  
+The sample results indicate that the mean yield for Fertilizer A is slightly higher than that for Fertilizer B, with an estimated difference (A − B) of 1.70.
+A 95% confidence interval for the difference in means is (-5.57, 8.97). Since this interval includes zero, it suggests that the true difference may be zero.
+The p-value for the test is 0.6137, which is substantially larger than the significance level of 0.05.
+
+## Results and Interpretation
+Since the p-value (0.6137) is greater than 0.05, we fail to reject the null hypothesis. This indicates that there is no statistically significant evidence of a difference in mean wheat yield between the two fertilizers.
+The confidence interval (-5.57, 8.97) also contains zero, reinforcing this conclusion.
+Although the observed difference in means (1.70) suggests that Fertilizer A may have a slightly higher yield, this difference is small relative to the variability in the data.
+Overall, there is insufficient evidence to conclude that Fertilizer A and Fertilizer B produce different mean wheat yields.
+
+# Part 2
+
+## Effect Size
+The effect size is defined as 
+\[
+ES = \frac{\mu_1 - \mu_2}{\sigma}
+\]
+where \(\delta\) is the observed difference in sample means, and \(\sigma\) is the standard deviation. 
+
+In this study, the effect size is 0.3. This indicates that the average wheat yield under Fertilizer A is higher than that under Fertilizer B in the observed sample as shown above. However, an effect size of 0.30 also suggests that the treatment difference is small relative to the variability in the data.
+
+```{r, echo = FALSE}
+# Effect Size
+
+library(scidesignR)
+data("fertdat")
+
+fert_A <- fertdat$fert[fertdat$trt == "A"]
+fert_B <- fertdat$fert[fertdat$trt == "B"]
+
+mean_A <- mean(fert_A)
+mean_B <- mean(fert_B)
+delta <- mean_A - mean_B
+
+sd_A <- sd(fert_A)
+sd_B <- sd(fert_B)
+
+sp <- sqrt(((length(fert_A) - 1) * sd_A^2 + (length(fert_B) - 1) * sd_B^2) / 
+             (length(fert_A) + length(fert_B) - 2))
+
+ES <- delta / sp
+```
+
+## Sample size
+To design the study, we calculated the required sample size for a two-sample t-test with 80% power at the 5% significance level with the exact method "power.t.test()". The required sample size within each group is: 
+```{r, echo = FALSE}
+# Exact Method
+power <- 0.8
+alpha <- 0.05
+
+exact_n <- power.t.test(
+  power = power,
+  delta = delta,
+  sd = sp, 
+  sig.level = alpha
+)
+exact_n
+# Round up the sample size
+req_n <- ceiling(exact_n$n)
+req_n
+```
+
+This output gives the required sample size of 174.4104 in each group. Since the sample size must be a whole number, I rounded up the size to 175. Therefore, this study would require 175 experimental units in each fertilizer group in order to achieve about 80% power.
+
+In order to check the result, we also calculated the power by simulation. We repeatedly generated two sample size of 175 in each group, one from the normal distribution with mean equal to the observed mean of Fertilizer A and one from a normal distribution with mean equal to the observed mean of Fertilizer B.
+```{r, echo = FALSE}
+# Simulation Power check 
+set.seed(1)
+alpha <- 0.05
+
+pvals <- replicate(10000,
+                   t.test(
+                     rnorm(req_n, mean = mean_A, sd = sp),
+                     rnorm(req_n, mean = mean_B, sd = sp),
+                     var.equal = TRUE)$p.value)
+sim_p <- sum((pvals <= alpha) / 10000)
+sim_p
+```
+The simulation estimates a power of 0.8049, which is very close to the target power of 0.8. It confirms that the sample size of 175 is reasonable. 
+
+## Sensetivity to Effect Size and Varibility
+
+In order to examine how the required sample size would change if effect size is smaller, or variability is larger. 
+
+Firstly, when the treatment difference between fertilizer A and fertilizer B is smaller and standard deviation remains the same. The new required sample size within each group will be:
+
+```{r, echo = FALSE}
+# When the effect side is smaller
+delta_small <- 1
+power <- 0.8
+alpha <- 0.05
+
+exact_n_smallD <- power.t.test(
+  power = power,
+  delta = delta_small,
+  sd = sp, 
+  sig.level = alpha
+)
+exact_n_smallD
+# Round up the sample size
+req_n_smallD <- ceiling(exact_n_smallD$n)
+req_n_smallD
+```
+
+Now considering a larger standard deviation while the difference between two treatment remains the same. The new required sample size is: 
+
+```{r, echo = FALSE}
+# When the variability is larger
+SD_Large <- 10
+power <- 0.8
+alpha <- 0.05
+
+exact_n_largeSD <- power.t.test(
+  power = power,
+  delta = delta_small,
+  sd = SD_Large, 
+  sig.level = alpha
+)
+exact_n_largeSD
+# Round up the sample size
+req_n_largeSD <- ceiling(exact_n_largeSD$n)
+req_n_largeSD
+```
+
+Therefore, when the effect size is reduced from 1.7 to 1, he required sample size increased from 175 to 503. When the standard deviation increased from 5.65 to 10, the required sample size increased from 175 to 1571. Both change result a increase in the required sample size. 
+
+
+
+# Part 3
+
+
+## 3A
+
+### Tasks
+
+## 3B
+
+### Tasks
+
+## 3C
+
+### Tasks
+
+
+The data from the R package \textit{coronavirus} has been reconstructed to have the first column representing recordings 
+over time from January to June 2020, and the next three columns representing the total number of confirmed cases, deaths 
+and recoveries in Canada. B
+
+
+```{r cars}
+summary(cars)
+```
+ 
+ 
+Based on this data, it is possible to estimate the number of individuals infected daily by,
+ 
+```{r, echo=FALSE}
+plot(pressure)
+```
+
+A simple linear regression is given by
+$$
+y=\beta_0 + \beta_1 x + \varepsilon
+$$
+
+
+# Part 4
+
+## Task 1
+
+The   model  
+
+\begin{equation} 
+\label{eq1}
+\frac{dS}{dt} = -\beta S(t)I(t) 
+\end{equation}
+
+The cumulative hazard function H(x), defined by $H(x) = \int_0^x h(u) {\rm d}u$. Thus, for continuous lifetimes, 
+\begin{equation}
+\label{eq2}
+S(x) = \exp[-H(x)] = \exp[-\int_0^x h(u) {\rm d}u]
+\end{equation}
+
+\begin{equation}
+E[dN_i^*(t)|{Z_i}(t)] = \exp \{ \gamma _0^T{Z_i}(t)\} d{\Lambda _0}(t)
+\end{equation}
+
+\begin{align}
+\label{eq4}
+y = {x^2} + \mathop {\lim }\limits_{n \to \infty } \sum\limits_{i = 1}^n {x_i^2} 
+\end{align}
+
+
+
+
+
+ 
+
+ 
+
+
+
+Markdown is a simple formatting syntax for authoring HTML, PDF, and 
+MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+
+
+Here is the table
+
+\begin{table}[htb]
+\small
+\caption{\scriptsize{very small captions}}
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+$x$    & 1 & 2   & 3 & 4 & 5    & 6 & 7 & 8    & 9 \\
+\hline
+$\beta_1$    & 10   & 15  & 25   & 32  &  45 &   51 & 64  & 76  & 98   \\
+\hline
+\end{tabular}
+\end{center}
+\label{tab1}
+\end{table}
+
+Table \ref{tab1} reports
+
+Recall that
+\begin{align}
+\label{eq1}
+(x+y)^n &=\sum\limits_{k=0}^n \binom{n}{k} x^k y^{n-k}  \\
+        &= x^n + n x y^{n-1} +...+nx^{n-1} y+ y^n \nonumber
+\end{align}
+Equation \eqref{eq1} is called the binomial (Newton) equation. 
+
+
+The results are
+\begin{itemize}
+
+\item A
+
+\item B
+
+\item C
+
+\end{itemize}
+
+
+
+
+
+
+in Equation \eqref{eq4}, we see that 
+
+ 
+
+ 
+ 
+\textbf{References}
+
+
+
+# Appendix {-}
+
+The following R code was used for the analysis.
+
+```{r appendix_code, echo=TRUE, eval=FALSE}
+######################### Part 1 ###########################
+# Load package and data
+library(scidesignR)
+data(fertdat)
+
+# Overview of dataset
+summary(fertdat)
+
+# Separate groups
+group_A <- fertdat$fert[fertdat$trt == "A"]
+group_B <- fertdat$fert[fertdat$trt == "B"]
+
+# Summary statistics
+summary(group_A)
+summary(group_B)
+
+# Boxplot
+boxplot(fert ~ trt, data = fertdat,
+        xlab = "Fertilizer Type",
+        ylab = "Wheat Yield",
+        main = "Comparison of Wheat Yield by Fertilizer Type")
+
+# Fit model
+model <- lm(fert ~ trt, data = fertdat)
+
+# Residuals
+res <- residuals(model)
+
+# Normality check
+qqnorm(res)
+qqline(res)
+shapiro.test(res)
+
+# Equal variance check
+plot(fitted(model), res,
+     xlab = "Fitted Values",
+     ylab = "Residuals",
+     main = "Residuals vs Fitted Plot")
+abline(h = 0, col = "red")
+var.test(group_A, group_B)
+
+# Two-sample t-test
+t.test(group_A, group_B,
+       var.equal = TRUE,
+       alternative = "two.sided")
+
+# Key values
+mean(group_A)
+mean(group_B)
+mean(group_A) - mean(group_B)
+
+#################### Part 2 #################################
+
+### Effect Size
+library(scidesignR)
+data("fertdat")
+
+fert_A <- fertdat$fert[fertdat$trt == "A"]
+fert_B <- fertdat$fert[fertdat$trt == "B"]
+
+mean_A <- mean(fert_A)
+mean_B <- mean(fert_B)
+delta <- mean_A - mean_B
+
+sd_A <- sd(fert_A)
+sd_B <- sd(fert_B)
+
+sp <- sqrt(((length(fert_A) - 1) * sd_A^2 + (length(fert_B) - 1) * sd_B^2) / 
+             (length(fert_A) + length(fert_B) - 2))
+
+ES <- delta / sp
+
+### Exact Method
+power <- 0.8
+alpha <- 0.05
+
+exact_n <- power.t.test(
+  power = power,
+  delta = delta,
+  sd = sp, 
+  sig.level = alpha
+)
+exact_n
+# Round up the sample size
+req_n <- ceiling(exact_n$n)
+req_n
+
+### Simulation Power check 
+set.seed(1)
+alpha <- 0.05
+
+pvals <- replicate(10000,
+                   t.test(
+                     rnorm(req_n, mean = mean_A, sd = sd_A),
+                     rnorm(req_n, mean = mean_B, sd = sd_B),
+                     var.equal = TRUE)$p.value)
+sim_p <- sum((pvals <= alpha) / 10000)
+sim_p
+
+### When the effect side is smaller
+delta_small <- 1
+power <- 0.8
+alpha <- 0.05
+
+exact_n_smallD <- power.t.test(
+  power = power,
+  delta = delta_small,
+  sd = sp, 
+  sig.level = alpha
+)
+exact_n_smallD
+# Round up the sample size
+req_n_smallD <- ceiling(exact_n_smallD$n)
+req_n_smallD
+
+### When the variability is larger
+SD_Large <- 10
+power <- 0.8
+alpha <- 0.05
+
+exact_n_largeSD <- power.t.test(
+  power = power,
+  delta = delta_small,
+  sd = SD_Large, 
+  sig.level = alpha
+)
+exact_n_largeSD
+# Round up the sample size
+req_n_largeSD <- ceiling(exact_n_largeSD$n)
+req_n_largeSD
+
+####################### Part 3 ###############################
+
+
+
+
+
+
+
+
+
+
+##################### part 4 ################################
