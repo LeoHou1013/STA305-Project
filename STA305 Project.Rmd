@@ -293,7 +293,7 @@ effects_summary
 
 ```{r}
 # estimate main effects and interactions method 2
-library(FrF2)
+#library(FrF2)
 
 wt.model <- lm(y ~ A*B*C, data = wtlossdat)
 cubePlot(wt.model, "A", "B", "C", main = "Cube plot for wtlossdat")
