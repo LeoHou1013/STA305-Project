@@ -101,13 +101,8 @@ Overall, there is insufficient evidence to conclude that Fertilizer A and Fertil
 # Part 2
 
 ## Effect Size
-The effect size is defined as 
-\[
-ES = \frac{\mu_1 - \mu_2}{\sigma}
-\]
-where \(\delta\) is the observed difference in sample means, and \(\sigma\) is the standard deviation. 
 
-In this study, the effect size is 0.3. This indicates that the average wheat yield under Fertilizer A is higher than that under Fertilizer B in the observed sample as shown above. However, an effect size of 0.30 also suggests that the treatment difference is small relative to the variability in the data.
+The effect size in this study is about 0.30. This indicates that the average wheat yield under Fertilizer A is higher than that under Fertilizer B in the observed sample as shown above. However, an effect size of 0.30 also suggests that the treatment difference is small relative to the variability in the data.
 
 ```{r, echo = FALSE}
 # Effect Size
@@ -160,13 +155,13 @@ alpha <- 0.05
 
 pvals <- replicate(10000,
                    t.test(
-                     rnorm(req_n, mean = mean_A, sd = sp),
-                     rnorm(req_n, mean = mean_B, sd = sp),
+                     rnorm(req_n, mean = mean_A, sd = sd_A),
+                     rnorm(req_n, mean = mean_B, sd = sd_B),
                      var.equal = TRUE)$p.value)
 sim_p <- sum((pvals <= alpha) / 10000)
 sim_p
 ```
-The simulation estimates a power of 0.8049, which is very close to the target power of 0.8. It confirms that the sample size of 175 is reasonable. 
+The simulation estimates a power of 0.8083, which is very close to the target power of 0.8. It proves that the required sample size of 175 using the exact method is correct. 
 
 ## Sensetivity to Effect Size and Varibility
 
@@ -256,7 +251,238 @@ $$
 
 # Part 4
 
-## Task 1
+```{r}
+data(wtlossdat)
+summary(wtlossdat)
+```
+
+
+There are three factors in this study, they are A, B, and C. 
+
+A is the level of food diary with two level 1 and -1. 
+B is the level of increasing activity with two level 1 and -1. 
+C is the level of home visit with two level 1 and -1. 
+
+The response variable is y which means weight loss(kg).
+
+
+```{r}
+# estimate main effects and interactions method 1
+complete_model <- lm(y ~ A*B*C, data = wtlossdat)
+
+coef_estimates <- coef(complete_model)
+
+effect_A   <- 2 * coef_estimates["A"]
+effect_B   <- 2 * coef_estimates["B"]
+effect_C   <- 2 * coef_estimates["C"]
+
+effect_AB  <- 2 * coef_estimates["A:B"]
+effect_AC  <- 2 * coef_estimates["A:C"]
+effect_BC  <- 2 * coef_estimates["B:C"]
+
+effect_ABC <- 2 * coef_estimates["A:B:C"]
+
+effects_summary <- data.frame(
+  Effect = c("A", "B", "C", "AB", "AC", "BC", "ABC"),
+  Estimate = c(effect_A, effect_B, effect_C,
+               effect_AB, effect_AC, effect_BC, effect_ABC)
+)
+
+effects_summary
+```
+
+```{r}
+# estimate main effects and interactions method 2
+library(FrF2)
+
+wt.model <- lm(y ~ A*B*C, data = wtlossdat)
+cubePlot(wt.model, "A", "B", "C", main = "Cube plot for wtlossdat")
+mean_A_pos <- (1.0 + 2.6 - 0.4 + 0.4) / 4
+mean_A_neg  <- (1.1 + 1.8 - 0.3 - 1.1) / 4
+effect_A_mean <- mean_A_pos - mean_A_neg
+
+mean_B_pos <- (-0.3 - 1.1 - 0.4 + 0.4) / 4
+mean_B_neg  <- (1.1 + 1.8 + 1.0 + 2.6) / 4
+effect_B_mean <- mean_B_pos - mean_B_neg
+
+mean_C_pos <- (1.8 - 1.1 + 2.6 + 0.4) / 4
+mean_C_neg <- (1.1 - 0.3 + 1.0 - 0.4) / 4
+effect_C_mean <- mean_C_pos - mean_C_neg
+
+mean_same_symbol_AB  <- (1.1 + 1.8 - 0.4 + 0.4) / 4
+mean_different_symbol_AB <- (-0.3 - 1.1 + 1.0 + 2.6) / 4
+effect_AB_mean <- mean_same_symbol_AB - mean_different_symbol_AB
+
+mean_same_symbol_AC  <- (1.1 - 0.3 + 2.6 + 0.4) / 4
+mean_different_symbol_AC <- (1.8 - 1.1 + 1.0 - 0.4) / 4
+effect_AC_mean <- mean_same_symbol_AC - mean_different_symbol_AC
+
+mean_same_symbol_BC  <- (1.1 - 1.1 + 1.0 + 0.4) / 4
+mean_different_symbol_BC <- (1.8 - 0.3 + 2.6 - 0.4) / 4
+effect_BC_mean <- mean_same_symbol_BC - mean_different_symbol_BC
+
+mean_product_ABC_pos  <- (1.8 - 0.3 + 1.0 + 0.4) / 4
+mean_product_ABC_neg <- (1.1 - 1.1 + 2.6 - 0.4) / 4
+effect_ABC_mean <- mean_product_ABC_pos - mean_product_ABC_neg
+
+effects.mean <- data.frame(
+  Effect = c("A","B","C","AB","AC","BC","ABC"),
+  Estimate = c(effect_A_mean, effect_B_mean, effect_C_mean,
+               effect_AB_mean, effect_AC_mean, effect_BC_mean, effect_ABC_mean)
+)
+effects.mean
+```
+
+# main effects/interaction plots to support interpretation
+
+# A mean
+
+mean_A_pos <- (1.0 + 2.6 - 0.4 + 0.4) / 4
+mean_A_neg  <- (1.1 + 1.8 - 0.3 - 1.1) / 4
+
+# B mean
+
+mean_B_pos <- (-0.3 - 1.1 - 0.4 + 0.4) / 4
+mean_B_neg  <- (1.1 + 1.8 + 1.0 + 2.6) / 4
+
+# C mean
+
+mean_C_pos <- (1.8 - 1.1 + 2.6 + 0.4) / 4
+mean_C_neg <- (1.1 - 0.3 + 1.0 - 0.4) / 4
+
+par(mfrow = c(1, 3))
+
+# plot A
+
+plot(c(-1, 1), c(mean_A_neg, mean_A_pos), type = "b", lwd = 3, pch = 19, col = "blue",
+     main = "effect_A_mean", xlab = "A", ylab = "Weight Loss")
+
+# plot B
+
+plot(c(-1, 1), c(mean_B_neg, mean_B_pos), type = "b", lwd = 3, pch = 19, col = "red",
+     main = "effect_B_mean", xlab = "B", ylab = "Weight Loss")
+
+# plot C
+
+plot(c(-1, 1), c(mean_C_neg, mean_C_pos), type = "b", lwd = 3, pch = 19, col = "green",
+     main = "effect_C_mean", xlab = "C", ylab = "Weight Loss")
+
+par(mfrow = c(1, 1))
+
+# AB interaction mean
+mean_same_symbol_AB <- (1.1 + 1.8 - 0.4 + 0.4)/4
+mean_different_symbol_AB <- (-0.3 -1.1 +1.0 +2.6)/4
+
+A_neg_B_neg <- (1.1 + 1.8)/2
+A_neg_B_pos <- (-0.3 -1.1)/2
+A_pos_B_neg <- (1.0 + 2.6)/2
+A_pos_B_pos <- (-0.4 + 0.4)/2
+
+# AC interaction mean
+mean_same_symbol_AC <- (1.1 -0.3 +2.6 +0.4)/4
+mean_different_symbol_AC <- (1.8 -1.1 +1.0 -0.4)/4
+
+A_neg_C_neg <- (1.1 -0.3)/2
+A_neg_C_pos <- (1.8 -1.1)/2
+A_pos_C_neg <- (1.0 -0.4)/2
+A_pos_C_pos <- (2.6 + 0.4)/2
+
+# BC interaction mean
+mean_same_symbol_BC <- (1.1 -1.1 +1.0 +0.4)/4
+mean_different_symbol_BC <- (1.8 -0.3 +2.6 -0.4)/4
+
+B_neg_C_neg <- (1.1 +1.0)/2
+B_neg_C_pos <- (1.8 +2.6)/2
+B_pos_C_neg <- (-0.3 -0.4)/2
+B_pos_C_pos <- (-1.1 +0.4)/2
+
+par(mfrow=c(1,3))
+
+# AB interaction plot
+plot(c(-1,1), c(A_neg_B_neg, A_pos_B_neg), type="b", lwd=3, pch=19, col="red", main="AB Interaction", xlab="A", ylab="y")
+lines(c(-1,1), c(A_neg_B_pos, A_pos_B_pos), type="b", lwd=3, pch=19, col="blue")
+
+# AC interaction plot
+plot(c(-1,1), c(A_neg_C_neg, A_pos_C_neg), type="b", lwd=3, pch=19, col="green",main="AC
+Interaction", xlab="A", ylab="y")
+lines(c(-1,1), c(A_neg_C_pos, A_pos_C_pos), type="b", lwd=3, pch=19, col="purple")
+
+# BC interaction plot
+plot(c(-1,1), c(B_neg_C_neg, B_pos_C_neg), type="b", lwd=3, pch=19, col="orange", main="BC Interaction", xlab="B", ylab="y")
+lines(c(-1,1), c(B_neg_C_pos, B_pos_C_pos), type="b", lwd=3, pch=19, col="brown")
+
+par(mfrow=c(1,1))
+
+# ABC interaction mean
+A_neg_B_neg_C_neg = 1.1
+A_neg_B_pos_C_neg = -0.3
+A_pos_B_neg_C_neg = 1.0
+A_pos_B_pos_C_neg = -0.4
+A_neg_B_neg_C_pos = 1.8
+A_pos_B_neg_C_pos = 2.6
+A_neg_B_pos_C_pos = -1.1
+A_pos_B_pos_C_pos = 0.4
+
+par(mfrow = c(2,1))
+
+# ABC interaction plot
+# where C = 1
+plot(c(-1, 1), c(A_neg_B_neg_C_pos, A_pos_B_neg_C_pos), type = "b", lwd = 3, pch = 19, col = "red",main = "ABC Interaction (C = 1)", xlab = "A", ylab = "Weight Loss", ylim = c(-1.5, 3))
+lines(c(-1, 1), c(A_neg_B_pos_C_pos, A_pos_B_pos_C_pos), type = "b", lwd = 3, pch = 19, col = "blue")
+
+# where C = -1
+plot(c(-1, 1), c(A_neg_B_neg_C_neg, A_pos_B_neg_C_neg), type = "b", lwd = 3, pch = 19, col = "red",main = "ABC Interaction (C = -1)", xlab = "A", ylab = "Weight Loss", ylim = c(-1.5, 3))
+lines(c(-1, 1), c(A_neg_B_pos_C_neg, A_pos_B_pos_C_neg), type = "b", lwd = 3, pch = 19, col = "blue")
+
+par(mfrow = c(1,1))
+
+# recommendation
+
+# effect A (Food diary)
+
+The main effect of A is positive. Keeping a food diary (which means 1) increases average weight loss compared to not keeping a diary (which means -1).
+
+So, factor A is beneficial for weight reduction.
+
+# effect B (Increasing activity)
+
+The main effect of B is negative. Increasing activity (which means 1) decreases average weight loss in this experiment.
+
+So, factor B is disadvantageous for weight reduction.
+
+# effect C (Home visit)
+
+The main effect of C is positive. Receiving home visit support (which means 1) increases average weight loss compared to no home visit (which means -1).
+
+So,factor C is beneficial for weight reduction.
+
+# AB Interaction
+
+According to the plot, the interaction of AB is small which inmplies the effect of food diary (A) barely depends on whether increasing activity (B) is increased or not. 
+
+So, there is not exist a strong relationship between A and B
+
+# AC Interaction
+
+According to the plot, the interaction of AC is weak positive which implies the benefit of a food diary(A) slightly increases when home visit(c) is provided. 
+
+So, there is exist a slightly relationship between A and C
+
+# BC Interaction
+
+According to the plot, the interaction of BC is close to zero which implies the effect of increasing activity(B) does not rely on home visits(C), 
+
+So, B and C are almost independent
+
+# ABC Interaction
+According to the plot, the interaction of ABC is very small, and they are almost look like parallel lines.
+
+So, there is not exist a strong relationship between A, B and C.
+
+Hence, in conclusion, to maximize weight loss (kg), the recommended factor settings are:
+A = 1: Implement food diary 
+B = -1: Decreasing activity
+C = 1: Implement home visit 
 
 The   model  
 
@@ -497,3 +723,49 @@ req_n_largeSD
 
 
 ##################### part 4 ################################
+## Load data
+wtlossdat <- data.frame(
+  A = c(-1, -1, -1, -1,  1,  1,  1,  1),
+  B = c(-1, -1,  1,  1, -1, -1,  1,  1),
+  C = c(-1,  1, -1,  1, -1,  1, -1,  1),
+  y = c(1.1, 1.8, -0.3, -1.1, 1.0, 2.6, -0.4, 0.4)
+)
+
+# package and data
+library(FrF2)
+data(wtlossdat)
+
+# Overview of data
+summary(wtlossdat)
+
+# Variables explanation
+ A = Food diary (1, -1)
+ B = Increasing activity (1, -1)
+ C = Home visit (1, -1)
+ y = Weight loss (kg)
+ 
+# Method 1: Effects from linear model
+Formula used: y ~ A*B*C
+Effect = 2 * coefficient (for -1/+1 values)
+
+# Method 2: Effects from mean differences
+high = for 1 value
+low = for -1 value
+Formula used: Effect = mean(high) - mean(low)
+
+# Main effects plots
+xlab = x-axis label (factor level)
+ylab = y-axis label (mean weight loss)
+type = "b" = both points and lines
+lwd: line width 
+pch: point shape 
+col: color
+
+# Two-way interaction plots 
+AB: there is not exist a strong relationship between A and B
+AC: there is exist a slightly relationship between A and C
+BC: B and C are almost independent 
+
+# Three-way interaction plots 
+ABC for c = 1/-1 : there is not exist a strong relationship between A, B and C.
+
