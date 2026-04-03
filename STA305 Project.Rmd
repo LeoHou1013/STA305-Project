@@ -209,11 +209,6 @@ req_n_largeSD
 
 Therefore, when the effect size is reduced from 1.7 to 1, he required sample size increased from 175 to 503. When the standard deviation increased from 5.65 to 10, the required sample size increased from 175 to 1571. Both change result a increase in the required sample size. 
 
-```{r}
-cat
-```
-
-
 
 # Part 3
 
