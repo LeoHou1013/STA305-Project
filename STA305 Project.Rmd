@@ -212,7 +212,6 @@ Therefore, when the effect size is reduced from 1.7 to 1, he required sample siz
 
 # Part 3
 
-
 ## 3A: One-way ANOVA
 
 ### Description
@@ -897,8 +896,6 @@ req_n_largeSD
 
 ####################### Part 3 ###############################
 
-```{r, echo=TRUE, eval=FALSE}
-
 # 3A
 data(painstudy)
 aov.pain <- aov(pain ~ trt, data = painstudy)
@@ -938,7 +935,7 @@ BR_LatSq$Treat <- as.factor(BR_LatSq$Treat)
 lat.model <- aov(Value ~ Treat + Dogs + Weeks, data = BR_LatSq)
 summary(lat.model)
 
-```
+
 
 ##################### part 4 ################################
 ## Load data
