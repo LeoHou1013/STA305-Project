@@ -466,11 +466,14 @@ effects_summary <- data.frame(
 )
 
 effects_summary
+
+
+round(2*complete_model$coef_estimates,2)
 ```
 
 ```{r}
 # estimate main effects and interactions method 2
-#library(FrF2)
+library(FrF2)
 
 wt.model <- lm(y ~ A*B*C, data = wtlossdat)
 cubePlot(wt.model, "A", "B", "C", main = "Cube plot for wtlossdat")
@@ -510,6 +513,8 @@ effects.mean <- data.frame(
 effects.mean
 ```
 
+
+```{r}
 # main effects/interaction plots to support interpretation
 
 # A mean
@@ -528,6 +533,7 @@ mean_C_pos <- (1.8 - 1.1 + 2.6 + 0.4) / 4
 mean_C_neg <- (1.1 - 0.3 + 1.0 - 0.4) / 4
 
 par(mfrow = c(1, 3))
+
 
 # plot A
 
@@ -612,6 +618,7 @@ plot(c(-1, 1), c(A_neg_B_neg_C_neg, A_pos_B_neg_C_neg), type = "b", lwd = 3, pch
 lines(c(-1, 1), c(A_neg_B_pos_C_neg, A_pos_B_pos_C_neg), type = "b", lwd = 3, pch = 19, col = "blue")
 
 par(mfrow = c(1,1))
+```
 
 # recommendation
 
@@ -949,6 +956,10 @@ data(wtlossdat)
 # Overview of data
 summary(wtlossdat)
 
+# linear model
+model <- lm(y ~ A*B*C, data = wtlossdat)
+summary(model)
+
 # Variables explanation
  A = Food diary (1, -1)
  B = Increasing activity (1, -1)
@@ -956,27 +967,105 @@ summary(wtlossdat)
  y = Weight loss (kg)
  
 # Method 1: Effects from linear model
-Formula used: y ~ A*B*C
-Effect = 2 * coefficient (for -1/+1 values)
+complete_model <- lm(y ~ A*B*C, data = wtlossdat)
+
+coef_estimates <- coef(complete_model)
+
+effect_A   <- 2 * coef_estimates["A"]
+effect_B   <- 2 * coef_estimates["B"]
+effect_C   <- 2 * coef_estimates["C"]
+
+effect_AB  <- 2 * coef_estimates["A:B"]
+effect_AC  <- 2 * coef_estimates["A:C"]
+effect_BC  <- 2 * coef_estimates["B:C"]
+
+effect_ABC <- 2 * coef_estimates["A:B:C"]
+
+effects_summary <- data.frame(
+  Effect = c("A", "B", "C", "AB", "AC", "BC", "ABC"),
+  Estimate = c(effect_A, effect_B, effect_C,
+               effect_AB, effect_AC, effect_BC, effect_ABC)
+)
+
+effects_summary
+
+
+round(2*complete_model$coef_estimates,2)
 
 # Method 2: Effects from mean differences
-high = for 1 value
-low = for -1 value
-Formula used: Effect = mean(high) - mean(low)
+library(FrF2)
 
-# Main effects plots
-xlab = x-axis label (factor level)
-ylab = y-axis label (mean weight loss)
-type = "b" = both points and lines
-lwd: line width 
-pch: point shape 
-col: color
+wt.model <- lm(y ~ A*B*C, data = wtlossdat)
+cubePlot(wt.model, "A", "B", "C", main = "Cube plot for wtlossdat")
+mean_A_pos <- (1.0 + 2.6 - 0.4 + 0.4) / 4
+mean_A_neg  <- (1.1 + 1.8 - 0.3 - 1.1) / 4
+effect_A_mean <- mean_A_pos - mean_A_neg
 
-# Two-way interaction plots 
-AB: there is not exist a strong relationship between A and B
-AC: there is exist a slightly relationship between A and C
-BC: B and C are almost independent 
+mean_B_pos <- (-0.3 - 1.1 - 0.4 + 0.4) / 4
+mean_B_neg  <- (1.1 + 1.8 + 1.0 + 2.6) / 4
+effect_B_mean <- mean_B_pos - mean_B_neg
 
-# Three-way interaction plots 
-ABC for c = 1/-1 : there is not exist a strong relationship between A, B and C.
+mean_C_pos <- (1.8 - 1.1 + 2.6 + 0.4) / 4
+mean_C_neg <- (1.1 - 0.3 + 1.0 - 0.4) / 4
+effect_C_mean <- mean_C_pos - mean_C_neg
+
+mean_same_symbol_AB  <- (1.1 + 1.8 - 0.4 + 0.4) / 4
+mean_different_symbol_AB <- (-0.3 - 1.1 + 1.0 + 2.6) / 4
+effect_AB_mean <- mean_same_symbol_AB - mean_different_symbol_AB
+
+mean_same_symbol_AC  <- (1.1 - 0.3 + 2.6 + 0.4) / 4
+mean_different_symbol_AC <- (1.8 - 1.1 + 1.0 - 0.4) / 4
+effect_AC_mean <- mean_same_symbol_AC - mean_different_symbol_AC
+
+mean_same_symbol_BC  <- (1.1 - 1.1 + 1.0 + 0.4) / 4
+mean_different_symbol_BC <- (1.8 - 0.3 + 2.6 - 0.4) / 4
+effect_BC_mean <- mean_same_symbol_BC - mean_different_symbol_BC
+
+mean_product_ABC_pos  <- (1.8 - 0.3 + 1.0 + 0.4) / 4
+mean_product_ABC_neg <- (1.1 - 1.1 + 2.6 - 0.4) / 4
+effect_ABC_mean <- mean_product_ABC_pos - mean_product_ABC_neg
+
+effects.mean <- data.frame(
+  Effect = c("A","B","C","AB","AC","BC","ABC"),
+  Estimate = c(effect_A_mean, effect_B_mean, effect_C_mean,
+               effect_AB_mean, effect_AC_mean, effect_BC_mean, effect_ABC_mean)
+)
+effects.mean
+
+# plot A
+
+plot(c(-1, 1), c(mean_A_neg, mean_A_pos), type = "b", lwd = 3, pch = 19, col = "blue",
+     main = "effect_A_mean", xlab = "A", ylab = "Weight Loss")
+
+# plot B
+
+plot(c(-1, 1), c(mean_B_neg, mean_B_pos), type = "b", lwd = 3, pch = 19, col = "red",
+     main = "effect_B_mean", xlab = "B", ylab = "Weight Loss")
+
+# plot C
+
+plot(c(-1, 1), c(mean_C_neg, mean_C_pos), type = "b", lwd = 3, pch = 19, col = "green",
+     main = "effect_C_mean", xlab = "C", ylab = "Weight Loss")
+
+# AB interaction plot
+plot(c(-1,1), c(A_neg_B_neg, A_pos_B_neg), type="b", lwd=3, pch=19, col="red", main="AB Interaction", xlab="A", ylab="y")
+lines(c(-1,1), c(A_neg_B_pos, A_pos_B_pos), type="b", lwd=3, pch=19, col="blue")
+
+# AC interaction plot
+plot(c(-1,1), c(A_neg_C_neg, A_pos_C_neg), type="b", lwd=3, pch=19, col="green",main="AC
+Interaction", xlab="A", ylab="y")
+lines(c(-1,1), c(A_neg_C_pos, A_pos_C_pos), type="b", lwd=3, pch=19, col="purple")
+
+# BC interaction plot
+plot(c(-1,1), c(B_neg_C_neg, B_pos_C_neg), type="b", lwd=3, pch=19, col="orange", main="BC Interaction", xlab="B", ylab="y")
+lines(c(-1,1), c(B_neg_C_pos, B_pos_C_pos), type="b", lwd=3, pch=19, col="brown")
+
+# ABC interaction plot
+# where C = 1
+plot(c(-1, 1), c(A_neg_B_neg_C_pos, A_pos_B_neg_C_pos), type = "b", lwd = 3, pch = 19, col = "red",main = "ABC Interaction (C = 1)", xlab = "A", ylab = "Weight Loss", ylim = c(-1.5, 3))
+lines(c(-1, 1), c(A_neg_B_pos_C_pos, A_pos_B_pos_C_pos), type = "b", lwd = 3, pch = 19, col = "blue")
+
+# where C = -1
+plot(c(-1, 1), c(A_neg_B_neg_C_neg, A_pos_B_neg_C_neg), type = "b", lwd = 3, pch = 19, col = "red",main = "ABC Interaction (C = -1)", xlab = "A", ylab = "Weight Loss", ylim = c(-1.5, 3))
+lines(c(-1, 1), c(A_neg_B_pos_C_neg, A_pos_B_pos_C_neg), type = "b", lwd = 3, pch = 19, col = "blue")
 
