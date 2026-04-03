@@ -147,6 +147,10 @@ req_n
 
 This output gives the required sample size of 174.4104 in each group. Since the sample size must be a whole number, I rounded up the size to 175. Therefore, this study would require 175 experimental units in each fertilizer group in order to achieve about 80% power.
 
+```{r}
+cat
+```
+
 In order to check the result, we also calculated the power by simulation. We repeatedly generated two sample size of 175 in each group, one from the normal distribution with mean equal to the observed mean of Fertilizer A and one from a normal distribution with mean equal to the observed mean of Fertilizer B.
 ```{r, echo = FALSE}
 # Simulation Power check 
