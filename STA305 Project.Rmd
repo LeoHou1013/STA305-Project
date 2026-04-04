@@ -127,7 +127,11 @@ ES <- delta / sp
 ```
 
 ## Sample size
-To design the study, we calculated the required sample size for a two-sample t-test with 80% power at the 5% significance level with the exact method "power.t.test()". The required sample size within each group is: 
+### Exact Method
+To design the future study, I calculated the required sample size for a two-sample t-test with 80% power at the 5% significance level using the exact method in `power.t.test()`. The calculation was based on the observed mean difference, \(\delta = 1.7\), and the pooled standard deviation, \(s_p = 5.65\).
+
+Since the sample size must be a whole number, we rounded up the size to 175. Therefore, this study would require 175 experimental units in each fertilizer group in order to achieve about 80% power.
+
 ```{r, echo = FALSE}
 # Exact Method
 power <- 0.8
@@ -139,15 +143,13 @@ exact_n <- power.t.test(
   sd = sp, 
   sig.level = alpha
 )
-exact_n
 # Round up the sample size
 req_n <- ceiling(exact_n$n)
-req_n
 ```
+### Simulation-based power check
+In order to check the result, we also calculated the power by simulation. We repeatedly generated two sample size of 175 in each group, one from the normal distribution with mean equal to the observed mean of Fertilizer A and one from a normal distribution with mean equal to the observed mean of Fertilizer B. And the same pooled standard deviation in both fertilizer groups to match the assumption. 
 
-This output gives the required sample size of 174.4104 in each group. Since the sample size must be a whole number, I rounded up the size to 175. Therefore, this study would require 175 experimental units in each fertilizer group in order to achieve about 80% power.
-
-In order to check the result, we also calculated the power by simulation. We repeatedly generated two sample size of 175 in each group, one from the normal distribution with mean equal to the observed mean of Fertilizer A and one from a normal distribution with mean equal to the observed mean of Fertilizer B.
+The simulation estimates a power of 0.8049, which is very close to the target power of 0.8. Therefore, the result confirms that the required sample size of 175 using the exact method is correct. 
 ```{r, echo = FALSE}
 # Simulation Power check 
 set.seed(1)
@@ -155,19 +157,18 @@ alpha <- 0.05
 
 pvals <- replicate(10000,
                    t.test(
-                     rnorm(req_n, mean = mean_A, sd = sd_A),
-                     rnorm(req_n, mean = mean_B, sd = sd_B),
+                     rnorm(req_n, mean = mean_A, sd = sp),
+                     rnorm(req_n, mean = mean_B, sd = sp),
                      var.equal = TRUE)$p.value)
 sim_p <- sum((pvals <= alpha) / 10000)
-sim_p
 ```
-The simulation estimates a power of 0.8083, which is very close to the target power of 0.8. It proves that the required sample size of 175 using the exact method is correct. 
 
 ## Sensetivity to Effect Size and Varibility
+### Effect size is smaller
 
 In order to examine how the required sample size would change if effect size is smaller, or variability is larger. 
 
-Firstly, when the treatment difference between fertilizer A and fertilizer B is smaller and standard deviation remains the same. The new required sample size within each group will be:
+First, we consider the case where the treatment difference between Fertilizer A and Fertilizer B is smaller, while the standard deviation remains the same. In this case, we reduce the effect size from 1.7 to 1.0 and recalculate the required sample size using the same 80% power and 5% significance level. The result for the required sample size increased from 175 to 503.
 
 ```{r, echo = FALSE}
 # When the effect side is smaller
@@ -181,13 +182,12 @@ exact_n_smallD <- power.t.test(
   sd = sp, 
   sig.level = alpha
 )
-exact_n_smallD
 # Round up the sample size
 req_n_smallD <- ceiling(exact_n_smallD$n)
-req_n_smallD
 ```
 
-Now considering a larger standard deviation while the difference between two treatment remains the same. The new required sample size is: 
+### Variability is larger
+Next, we consider the case where the standard deviation is larger while the treatment difference remains the same. In this scenario, we increase the standard deviation from 5.65 to 10 and recalculate the required sample size using the same 80% power and 5% significance level. The result for the required sample size increased from 175 to 545. 
 
 ```{r, echo = FALSE}
 # When the variability is larger
@@ -197,18 +197,15 @@ alpha <- 0.05
 
 exact_n_largeSD <- power.t.test(
   power = power,
-  delta = delta_small,
+  delta = delta,
   sd = SD_Large, 
   sig.level = alpha
 )
-exact_n_largeSD
 # Round up the sample size
 req_n_largeSD <- ceiling(exact_n_largeSD$n)
-req_n_largeSD
 ```
-
-Therefore, when the effect size is reduced from 1.7 to 1, he required sample size increased from 175 to 503. When the standard deviation increased from 5.65 to 10, the required sample size increased from 175 to 1571. Both change result a increase in the required sample size. 
-
+### Conclusion
+Therefore, the required sample size increased in both cases. 
 
 # Part 3
 
@@ -619,45 +616,45 @@ lines(c(-1, 1), c(A_neg_B_pos_C_neg, A_pos_B_pos_C_neg), type = "b", lwd = 3, pc
 par(mfrow = c(1,1))
 ```
 
-# recommendation
+## recommendation
 
-# effect A (Food diary)
+### effect A (Food diary)
 
 The main effect of A is positive. Keeping a food diary (which means 1) increases average weight loss compared to not keeping a diary (which means -1).
 
 So, factor A is beneficial for weight reduction.
 
-# effect B (Increasing activity)
+### effect B (Increasing activity)
 
 The main effect of B is negative. Increasing activity (which means 1) decreases average weight loss in this experiment.
 
 So, factor B is disadvantageous for weight reduction.
 
-# effect C (Home visit)
+### effect C (Home visit)
 
 The main effect of C is positive. Receiving home visit support (which means 1) increases average weight loss compared to no home visit (which means -1).
 
 So,factor C is beneficial for weight reduction.
 
-# AB Interaction
+## AB Interaction
 
 According to the plot, the interaction of AB is small which inmplies the effect of food diary (A) barely depends on whether increasing activity (B) is increased or not. 
 
 So, there is not exist a strong relationship between A and B
 
-# AC Interaction
+## AC Interaction
 
 According to the plot, the interaction of AC is weak positive which implies the benefit of a food diary(A) slightly increases when home visit(c) is provided. 
 
 So, there is exist a slightly relationship between A and C
 
-# BC Interaction
+## BC Interaction
 
 According to the plot, the interaction of BC is close to zero which implies the effect of increasing activity(B) does not rely on home visits(C), 
 
 So, B and C are almost independent
 
-# ABC Interaction
+## ABC Interaction
 According to the plot, the interaction of ABC is very small, and they are almost look like parallel lines.
 
 So, there is not exist a strong relationship between A, B and C.
