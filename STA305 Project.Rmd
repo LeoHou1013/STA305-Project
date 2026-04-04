@@ -254,11 +254,11 @@ To evaluate the assumptions of the ANOVA model, diagnostic plots were examined. 
 
 The null hypothesis is that all treatment means are equal:
 
-H₀: μ₁ = μ₂ = μ₃  
+H₀: All the mean values are equal
 
 The alternative hypothesis is that at least one treatment mean differs:
 
-Hₐ: Not all μ are equal.
+Hₐ: Not all mean values are equal.
 
 Based on the ANOVA output, the p-value is less than 0.001.
 
