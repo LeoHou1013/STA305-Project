@@ -361,7 +361,7 @@ BR_LatSq$Treat <- as.factor(BR_LatSq$Treat)
 ```
 
 ```{r}
-lat.model <- lm(Value ~ Treat + as.factor(Dogs) + as.factor(Weeks), data = BR_LatSq)
+lat.model <- lm(value ~ Treat + as.factor(Dogs) + as.factor(Weeks), data = BR_LatSq)
 anova(lat.model)
 ```
 
