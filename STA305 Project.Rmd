@@ -209,6 +209,10 @@ Therefore, the required sample size increased in both cases.
 
 # Part 3
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
 ## 3A: One-way ANOVA
 
 ### Description
