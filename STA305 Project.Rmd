@@ -213,88 +213,74 @@ Therefore, the required sample size increased in both cases.
 
 ## Description
 
-```{r, echo=FALSE, results='hide'}
-library(scidesignR)
-data(painstudy)
-summary(painstudy)
-```
+The dataset *painstudy* contains observations of pain levels under different treatment groups. The response variable is *pain*, and the explanatory variable is *trt* (treatment).
 
-The dataset painstudy contains observations of pain levels under different treatment groups. The objective is to determine whether the mean pain levels differ across treatments.
+The pain values range from 1 to 10, with a mean of approximately 5.72 and a median of 6, indicating a moderate level of pain across observations.
+
+The objective is to determine whether the mean pain levels differ across treatments.
 
 ## Check Assumptions
 
-```{r, echo=FALSE, results='hide'}
+```{r, echo=FALSE}
 aov.pain <- aov(pain ~ trt, data = painstudy)
-summary(aov.pain)
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.width=5, fig.height=4, fig.align="center"}
 plot(aov.pain$fitted.values, aov.pain$residuals,
-     ylab = "Residuals", xlab = "Fitted",
-     main = "One-way ANOVA")
+     ylab = "Residuals", xlab = "Fitted values",
+     main = "Residuals vs Fitted")
 abline(h = 0)
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.width=5, fig.height=4, fig.align="center"}
 qqnorm(aov.pain$residuals, main = "Normal Q-Q Plot")
 qqline(aov.pain$residuals)
 ```
 
-To evaluate the assumptions of the ANOVA model, diagnostic plots were examined. The residuals appear randomly scattered around zero, suggesting that the assumption of constant variance is reasonable. The Q-Q plot indicates that the residuals are approximately normally distributed. Overall, there is no strong evidence that the ANOVA assumptions are violated.
+The residual plot shows that the residuals are randomly scattered around zero, suggesting that the assumption of constant variance is satisfied.  
+
+The Q-Q plot indicates that the residuals are approximately normally distributed.  
+
+Overall, the model assumptions appear to be reasonable.
 
 ## Interpret Results
 
-The null hypothesis is:
+The null hypothesis is: H0: All treatment means are equal.
 
-H₀: All treatment means are equal.
+The alternative hypothesis is: Ha: At least one treatment mean differs.
 
-The alternative hypothesis is:
+Based on the ANOVA results, the F-statistic is large (F ≈ 98.92) and the p-value is less than 0.001. Since the p-value is smaller than 0.05, we reject the null hypothesis.
 
-Hₐ: At least one treatment mean differs.
-
-Based on the ANOVA output, the p-value is less than 0.001. Since the p-value is smaller than the significance level of 0.05, we reject the null hypothesis.
-
-```{r, echo=FALSE, results='hide'}
-TukeyHSD(aov.pain)
-```
-
-The Tukey post-hoc analysis shows that all pairwise comparisons are statistically significant. In particular, treatment B has a higher mean response than treatment A, while treatment C has the lowest mean response among the three groups.
+This provides strong evidence that the mean pain levels differ across treatments. The large F-statistic indicates that the variation between treatments is much greater than the variation within treatments.
 
 ## Conclusion
 
-There is sufficient evidence to conclude that treatment has a statistically significant effect on pain levels. Among the three treatments, treatment B has the highest mean response, followed by treatment A, while treatment C has the lowest.
+There is sufficient evidence to conclude that treatment has a statistically significant effect on pain levels. Among the treatments, treatment B has the highest mean response, followed by treatment A, while treatment C has the lowest.
 
 # 3B: Randomized Block Design
 
 ## Description
 
-```{r, echo=FALSE, results='hide'}
-data(shoedat_obs)
-summary(shoedat_obs)
-```
+The dataset *shoedat_obs* records wear measurements under two treatments, A and B. Each boy receives both treatments, so *boy* is used as a blocking factor.
 
-```{r, echo=FALSE, results='hide'}
+By using a randomized block design, the comparison between treatments is made within each boy, which helps control for variability due to individual differences.
+
+## Check Assumptions
+
+```{r, echo=FALSE}
 shoe_long <- data.frame(
   boy = rep(shoedat_obs$boy, 2),
   treatment = rep(c("A", "B"), each = nrow(shoedat_obs)),
-  side = c(shoedat_obs$sideA, shoedat_obs$sideB),
   wear = c(shoedat_obs$wearA, shoedat_obs$wearB)
 )
 
 shoe_long$boy <- factor(shoe_long$boy)
 shoe_long$treatment <- factor(shoe_long$treatment)
-```
 
-In this experiment, boy is treated as a blocking factor. Since each boy receives both treatments A and B, the treatment comparison can be made within the same individual. This helps control for variability between boys, such as differences in physical condition or activity level.
-
-## Check Assumptions
-
-```{r, echo=FALSE, results='hide'}
 rbd_model <- aov(wear ~ treatment + boy, data = shoe_long)
-summary(rbd_model)
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.width=5, fig.height=4, fig.align="center"}
 plot(rbd_model$fitted.values, rbd_model$residuals,
      xlab = "Fitted values",
      ylab = "Residuals",
@@ -302,91 +288,81 @@ plot(rbd_model$fitted.values, rbd_model$residuals,
 abline(h = 0)
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.width=5, fig.height=4, fig.align="center"}
 qqnorm(rbd_model$residuals, main = "Normal Q-Q Plot")
 qqline(rbd_model$residuals)
 ```
 
-The residual plot shows no obvious pattern, indicating that the assumption of constant variance is reasonable. The Q-Q plot suggests that the residuals are approximately normally distributed. Therefore, the model assumptions appear to be satisfied.
+The residual plot shows no clear pattern, indicating that the assumption of constant variance is reasonable.  
+
+The Q-Q plot suggests that the residuals are approximately normally distributed.  
+
+Therefore, the assumptions of the model are satisfied.
 
 ## Interpret Results
 
-```{r, echo=FALSE, results='hide'}
-unblocked_model <- aov(wear ~ treatment, data = shoe_long)
-summary(unblocked_model)
-```
+The null hypothesis is: H0: The mean wear is the same for both treatments.
+The alternative hypothesis is: Ha: The mean wear differs between the two treatments.
 
-The null hypothesis is:
+Based on the ANOVA results, the p-value for treatment is less than 0.05. Therefore, we reject the null hypothesis.
 
-H₀: The mean wear is the same for both treatments.
+This indicates that there is a statistically significant difference in wear between the two treatments.
 
-The alternative hypothesis is:
-
-Hₐ: The mean wear differs between the two treatments.
-
-Based on the ANOVA output, the p-value for treatment is less than 0.05. Since the p-value is below 0.05, we reject the null hypothesis.
-
-Compared with the unblocked analysis, including boy as a blocking factor reduces unexplained variability. This indicates that some of the variation in wear is due to differences between boys, and blocking improves the precision of the treatment comparison.
+Including *boy* as a blocking factor reduces the residual variation, meaning that some variability is explained by differences between individuals. This improves the precision of the treatment comparison.
 
 ## Conclusion
 
-There is sufficient evidence to conclude that treatment has a significant effect on wear. Using boy as a blocking factor improves the analysis by accounting for individual differences and reducing residual variation.
+There is sufficient evidence to conclude that treatment has a significant effect on wear. The randomized block design improves the analysis by accounting for variability between boys and providing a more accurate estimate of the treatment effect.
 
 # 3C: Latin Square
 
 ## Description
 
-```{r, echo=FALSE, results='hide'}
-data(BR_LatSq)
-summary(BR_LatSq)
-```
+In the dataset *BR_LatSq*, the response variable is *value*, the treatment variable is *Treat*, and the two blocking factors are *Dogs* and *Weeks*.
 
-In the dataset BR_LatSq, the response variable is value, the treatment variable is Treat, and the two blocking factors are Dogs and Weeks. This is a Latin square design because it controls for two possible sources of nuisance variation at the same time.
+This experiment follows a Latin square design, which is used to control for two sources of nuisance variability simultaneously. In this case, Dogs and Weeks are treated as blocking factors, while the main objective is to determine whether the treatment has a significant effect on the response variable.
 
 ## Check Assumptions
 
-```{r, echo=FALSE, results='hide'}
+```{r, echo=FALSE}
 BR_LatSq$Dogs <- as.factor(BR_LatSq$Dogs)
 BR_LatSq$Weeks <- as.factor(BR_LatSq$Weeks)
 BR_LatSq$Treat <- as.factor(BR_LatSq$Treat)
-```
 
-```{r, echo=FALSE, results='hide'}
 lat.model <- lm(value ~ Treat + Dogs + Weeks, data = BR_LatSq)
-anova(lat.model)
 ```
 
-```{r, echo=FALSE}
-qqnorm(lat.model$residuals, main = "Q-Q Plot for BR_LatSq")
+```{r, echo=FALSE, fig.width=5, fig.height=4, fig.align="center"}
+qqnorm(lat.model$residuals, main = "Q-Q Plot for Latin Square Model")
 qqline(lat.model$residuals)
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.width=5, fig.height=4, fig.align="center"}
 plot(lat.model$fitted.values, lat.model$residuals,
-     ylab = "Residuals", xlab = "Fitted",
-     main = "Residual Plot")
+     ylab = "Residuals", xlab = "Fitted values",
+     main = "Residuals vs Fitted")
 abline(h = 0)
 ```
 
-The Q-Q plot suggests that the residuals are approximately normally distributed. The residual plot does not show any strong pattern, so the assumption of constant variance appears reasonable. Overall, there is no strong evidence that the model assumptions are violated.
+The Q-Q plot indicates that the residuals are approximately normally distributed, as most points lie close to the reference line.  
+
+The residual plot shows no clear pattern and the points are randomly scattered around zero, suggesting that the assumption of constant variance is reasonable.  
+
+Overall, there is no strong evidence that the model assumptions are violated.
 
 ## Interpret Results
 
-The null hypothesis is:
+The null hypothesis is: H0: All treatment means are equal.
 
-H₀: All treatment means are equal.
+The alternative hypothesis is: Ha: At least one treatment mean differs.
 
-The alternative hypothesis is:
+Based on the ANOVA results, the p-value for the treatment effect is approximately 0.136. Since this p-value is greater than the significance level of 0.05, we fail to reject the null hypothesis. This suggests that there is no statistically significant evidence that the treatments differ in their effects on the response variable.
 
-Hₐ: At least one treatment mean differs.
-
-Based on the ANOVA table, the p-value for Treat is approximately 0.1362. Since this p-value is greater than 0.05, we fail to reject the null hypothesis.
-
-In addition, the blocking factors Dogs and Weeks are also not statistically significant, with p-values of approximately 0.2198 and 0.8878, respectively.
+In addition, the blocking factors Dogs and Weeks also have relatively large p-values, indicating that they do not contribute significantly to explaining variation in the response.
 
 ## Conclusion
 
-There is insufficient evidence to conclude that the treatment has a significant effect on the response variable after accounting for the blocking factors Dogs and Weeks. This suggests that, in this experiment, neither the treatment nor the two blocking factors explain a statistically significant amount of variation in the response.
+There is insufficient evidence to conclude that the treatment has a significant effect on the response variable after accounting for the blocking factors Dogs and Weeks. This indicates that, in this experiment, neither the treatment nor the blocking factors explain a statistically significant portion of the variability in the response.
 
 The data from the R package \textit{coronavirus} has been reconstructed to have the first column representing recordings 
 over time from January to June 2020, and the next three columns representing the total number of confirmed cases, deaths 
@@ -400,7 +376,7 @@ summary(cars)
  
 Based on this data, it is possible to estimate the number of individuals infected daily by,
  
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.width=5, fig.height=4, fig.align="center"}
 plot(pressure)
 ```
 
