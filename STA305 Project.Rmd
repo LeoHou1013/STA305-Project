@@ -417,15 +417,11 @@ data(wtlossdat)
 summary(wtlossdat)
 ```
 
-
 There are three factors in this study, they are A, B, and C. 
-
 A is the level of food diary with two level 1 and -1. 
 B is the level of increasing activity with two level 1 and -1. 
 C is the level of home visit with two level 1 and -1. 
-
 The response variable is y which means weight loss(kg).
-
 
 ```{r, echo=FALSE}
 # estimate main effects and interactions method 1
@@ -603,47 +599,26 @@ lines(c(-1, 1), c(A_neg_B_pos_C_neg, A_pos_B_pos_C_neg), type = "b", lwd = 3, pc
 par(mfrow = c(1,1))
 ```
 
-## recommendation
 ### effect A (Food diary)
-
-The main effect of A is positive. Keeping a food diary (which means 1) increases average weight loss compared to not keeping a diary (which means -1).
-
-So, factor A is beneficial for weight reduction.
+The main effect of A is beneficial for weight reduction.. Keeping a food diary (1) increases average weight loss compared to not keeping a diary (which means -1).
 
 ### effect B (Increasing activity)
-
-The main effect of B is negative. Increasing activity (which means 1) decreases average weight loss in this experiment.
-
-So, factor B is disadvantageous for weight reduction.
+The main effect of B is disadvantageous for weight reduction. Increasing activity (1) decreases average weight loss in this experiment.
 
 ### effect C (Home visit)
-
-The main effect of C is positive. Receiving home visit support (which means 1) increases average weight loss compared to no home visit (which means -1).
-
-So,factor C is beneficial for weight reduction.
+The main effect of C is  beneficial for weight reduction. Receiving home visit support (1) increases average weight loss compared to no home visit (-1).
 
 ## AB Interaction
-
-According to the plot, the interaction of AB is small which inmplies the effect of food diary (A) barely depends on whether increasing activity (B) is increased or not. 
-
-So, there is not exist a strong relationship between A and B
+The interaction of AB is small. The effect of food diary (A) barely depends on whether increasing activity (B) is increased or not. 
 
 ## AC Interaction
-
-According to the plot, the interaction of AC is weak positive which implies the benefit of a food diary(A) slightly increases when home visit(c) is provided. 
-
-So, there is exist a slightly relationship between A and C
+The interaction of AC is weak positive. The benefit of a food diary(A) slightly increases when home visit(c) is provided. 
 
 ## BC Interaction
-
-According to the plot, the interaction of BC is close to zero which implies the effect of increasing activity(B) does not rely on home visits(C), 
-
-So, B and C are almost independent
+B and C are almost independent. The effect of increasing activity(B) does not rely on home visits(C), 
 
 ## ABC Interaction
-According to the plot, the interaction of ABC is very small, and they are almost look like parallel lines.
-
-So, there is not exist a strong relationship between A, B and C.
+The interaction of ABC is very small, and they are almost look like parallel lines.
 
 Hence, in conclusion, to maximize weight loss (kg), the recommended factor settings are:
 A = 1: Implement food diary 
@@ -921,14 +896,6 @@ summary(lat.model)
 
 
 ##################### part 4 ################################
-## Load data
-wtlossdat <- data.frame(
-  A = c(-1, -1, -1, -1,  1,  1,  1,  1),
-  B = c(-1, -1,  1,  1, -1, -1,  1,  1),
-  C = c(-1,  1, -1,  1, -1,  1, -1,  1),
-  y = c(1.1, 1.8, -0.3, -1.1, 1.0, 2.6, -0.4, 0.4)
-)
-
 # package and data
 library(FrF2)
 data(wtlossdat)
