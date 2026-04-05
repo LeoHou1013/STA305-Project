@@ -3,11 +3,11 @@ title: 'STA305H5S: Project'
 author: "Bruce Liu, Chunxu Hou, jinke lyu, Yiran Zhai"
 date: "Winter 2026"
 output:
-  html_document:
-    df_print: paged
   pdf_document:
     number_sections: true
     latex_engine: xelatex
+  html_document:
+    df_print: paged
   word_document: default
 spacing: double
 header-includes:
@@ -386,7 +386,7 @@ $$
 
 # Part 4
 
-```{r, echo=FALSE, fig.width=8, fig.height=5, out.width="80%", dpi=300}
+```{r, echo=FALSE, fig.width=8, fig.height=5, out.width="50%", dpi=300}
 data(wtlossdat)
 summary(wtlossdat)
 ```
@@ -397,7 +397,7 @@ B is the level of increasing activity with two level 1 and -1.
 C is the level of home visit with two level 1 and -1. 
 The response variable is y which means weight loss(kg).
 
-```{r, echo=FALSE, fig.width=8, fig.height=5, out.width="80%", dpi=300}
+```{r, echo=FALSE, fig.width=8, fig.height=5, out.width="50%", dpi=300}
 # estimate main effects and interactions method 1
 complete_model <- lm(y ~ A*B*C, data = wtlossdat)
 
@@ -425,7 +425,7 @@ effects_summary
 round(2*complete_model$coef_estimates,2)
 ```
 
-```{r, echo=FALSE, fig.width=8, fig.height=5, out.width="80%", dpi=300}
+```{r, echo=FALSE, fig.width=8, fig.height=5, out.width="50%", dpi=300}
 # estimate main effects and interactions method 2
 library(FrF2)
 
@@ -468,7 +468,7 @@ effects.mean
 ```
 
 
-```{r, echo=FALSE, fig.width=8, fig.height=5, out.width="80%", dpi=300}
+```{r, echo=FALSE, fig.width=8, fig.height=5, out.width="50%", dpi=300}
 # main effects/interaction plots to support interpretation
 
 # A mean
